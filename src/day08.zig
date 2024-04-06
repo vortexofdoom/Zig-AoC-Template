@@ -11,7 +11,31 @@ const gpa = util.gpa;
 const data = @embedFile("data/day08.txt");
 
 pub fn main() !void {
-    
+    var lines = tokenizeSca(u8, data, '\n');
+    var res: usize = 0;
+    while (lines.next()) |line| {
+        // res += line.len;
+        // var i: usize = 1;
+        // while (i < line.len - 1) : (i += 1) {
+        //     if (line[i] == '\\') {
+        //         i += switch (line[i+1]) {
+        //             '\\', '\"' => 1,
+        //             else => 3,
+        //         };
+        //     }
+        //     res -= 1;   
+        // }
+        res += 2;
+        for (0..line.len) |i| {
+            res += switch (line[i]) {
+                '\\', '\"' => 2,
+                else => 1,
+            };
+        }
+        res -= line.len;
+    }
+
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

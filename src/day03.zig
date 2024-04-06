@@ -11,7 +11,7 @@ const gpa = util.gpa;
 const data = @embedFile("data/day03.txt");
 
 pub fn main() !void {
-    
+
 }
 
 // Useful stdlib functions
