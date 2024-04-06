@@ -8,10 +8,45 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day11.txt");
+var data = [8]u8{'v', 'z', 'b', 'x', 'k', 'g', 'h', 'b'};
+
+fn validate(pw: [8]u8) bool {
+    var run = false;
+    var pair1: ? usize = null;
+    var pair2 = false;
+    for (0..8) |i| {
+        switch (pw[i]) {
+            'i', 'o', 'l' => return false,
+            else => {
+                if (i < 6 and pw[i+1] == pw[i] + 1 and pw[i+2] == pw[i] + 2) run = true;
+                if (i < 7 and pw[i] == pw[i+1]) {
+                    if (pair1) |p1| {
+                        pair2 = i > (p1 + 1);
+                    } else pair1 = i;
+                } 
+            }
+        }
+    }
+    return run and pair2;
+}
+
+fn next() void {
+    if (data[7] != 'z') {
+        data[7] += 1;
+    } else {
+        var i: usize = 7;
+        while (data[i] == 'z') : (i -= 1) {
+            data[i] = 'a';
+        }
+        data[i] += 1;
+    }
+}
 
 pub fn main() !void {
-    
+    while (!validate(data)) : (next()) {}
+    next();
+    while (!validate(data)) : (next()) {}
+    print("{s}\n", .{data});
 }
 
 // Useful stdlib functions

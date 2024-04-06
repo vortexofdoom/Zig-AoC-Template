@@ -8,10 +8,34 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day10.txt");
+const data = "1113122113";
+var buf: [255]u8 = undefined;
 
 pub fn main() !void {
-    
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const alloc = arena.allocator();
+    var curr = List(u8).init(alloc);
+    try curr.appendSlice(data);
+    for (0..50) |_| {
+        var next = List(u8).init(alloc);
+        var count: usize = 0;
+        var last = curr.items[0];
+        for (curr.items) |c| {
+            if (c == last) {
+                count += 1;
+            } else {
+                try next.appendSlice(try std.fmt.bufPrint(&buf, "{d}", .{count}));
+                try next.append(last);
+                last = c;
+                count = 1;
+            }
+        }
+        try next.appendSlice(try std.fmt.bufPrint(&buf, "{d}", .{count}));
+        try next.append(last);
+        curr = next;
+    }
+    print("{d}\n", .{curr.items.len});
 }
 
 // Useful stdlib functions
