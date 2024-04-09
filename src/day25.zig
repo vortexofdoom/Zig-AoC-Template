@@ -8,10 +8,23 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day25.txt");
+// const data = @embedFile("data/day25.txt");
+
 
 pub fn main() !void {
-    
+    var n: u256 = 20151125;
+    for (2..100000) |i| {
+        var c: usize = 1;
+        var r: usize = i;
+        while (r > 0) : ({c += 1; r -= 1;}) {
+            n *= 252533;
+            n %= 33554393;
+            if (r == 2981 and c == 3075) {
+                print("({d}, {d}): {d}\n", .{r, c, n});
+                return;
+            }
+        }
+    }
 }
 
 // Useful stdlib functions

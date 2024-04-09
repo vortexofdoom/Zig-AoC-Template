@@ -1,0 +1,8 @@
+Dagger = 2
+Shortsword = 2
+warhammer = 4.166667
+longsword = 5.7143
+
+17.66667
+
+18.75

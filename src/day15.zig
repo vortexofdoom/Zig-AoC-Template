@@ -57,28 +57,43 @@ const candy = Ingredient{
     .cal = 8,
 };
 
-fn score() usize {
+fn score() isize {
     var cap: isize = 0;
     var dur: isize = 0;
     var fla: isize = 0;
     var tex: isize = 0;
     var cal: isize = 0;
-    cal = 0;
 
     for (ingredients, cookie) |i, c| {
-        cap += i.cap * c;
-        dur += i.dur * c;
-        fla += i.fla * c;
-        tex += i.tex * c;
+        cap += i.cap * @as(isize, c);
+        dur += i.dur * @as(isize, c);
+        fla += i.fla * @as(isize, c);
+        tex += i.tex * @as(isize, c);
+        cal += i.cal * @as(isize, c);
     }
-    
-    return @max(0, cap * dur * fla * tex);
+    if (cal != 500) return 0;
+    return @max(0, cap) * @max(0, dur) * @max(0, fla) * @max(0, tex);
 }
 
-var cookie = [4]isize{0, 0, 0, 0};
+var cookie = [4]u16{0, 0, 0, 0};
 
 pub fn main() !void {
-    
+    var res: isize = 0;
+    for (0..100) |sp| {
+        for (0..100-sp + 1) |bs| {
+            for (0..100 - (bs + sp) + 1) |ch| {
+                for (0..100-(bs+sp+ch)+1) |ca| {
+                    cookie[0] = @truncate(sp);
+                    cookie[1] = @truncate(bs);
+                    cookie[2] = @truncate(ch);
+                    cookie[3] = @truncate(ca);
+
+                    if (sp + bs + ch + ca == 100) res = @max(res, score());
+                }
+            }
+        }
+    }
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

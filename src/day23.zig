@@ -10,8 +10,60 @@ const gpa = util.gpa;
 
 const data = @embedFile("data/day23.txt");
 
+const Jump = struct {
+    reg: *isize,
+    offset: isize,
+};
+
+const Inst = union(enum) {
+    hlf: *isize,
+    tpl: *isize,
+    inc: *isize,
+    jmp: isize,
+    jie: Jump,
+    jio: Jump,
+};
+
+
+
 pub fn main() !void {
-    
+    var prog: [49]Inst = undefined;
+    var lines = tokenizeSca(u8, data, '\n');
+    var i: isize = 0;
+    var a: isize = 1;
+    var b: isize = 0;
+    while (lines.next()) |l| : (i += 1) {
+        if (l[2] == 'p') {
+            prog[@bitCast(i)] = Inst{ .jmp = try parseInt(isize, l[4..], 10) - 1 };
+            continue;
+        }
+        const reg = if (l[4] == 'a') &a else &b;
+        switch (l[2]) {
+            'f' => prog[@bitCast(i)] = Inst{ .hlf = reg },
+            'l' => prog[@bitCast(i)] = Inst{ .tpl = reg },
+            'c' => prog[@bitCast(i)] = Inst{ .inc = reg },
+            'e' => prog[@bitCast(i)] = Inst{ .jie = Jump{ .reg = reg, .offset = try parseInt(u8, l[7..], 10) - 1 } },
+            'o' => prog[@bitCast(i)] = Inst{ .jio = Jump{ .reg = reg, .offset = try parseInt(u8, l[7..], 10) - 1 } },
+            else => unreachable,
+        }
+    }
+    i = 0;
+    while (i < 49) : (i += 1) {
+        switch (prog[@bitCast(i)]) {
+            .hlf => |r| r.* = @divExact(r.*, 2),
+            .tpl => |r| r.* *= 3,
+            .inc => |r| r.* += 1,
+            .jmp => |o| i += o,
+            .jie => |j| {
+                if (j.reg.* & 1 == 0) i += j.offset;
+            },
+            .jio => |j| {
+                if (j.reg.* == 1) i += j.offset;
+            }
+        }
+    }
+
+    print("{d}\n", .{b});
 }
 
 // Useful stdlib functions

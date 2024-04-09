@@ -8,10 +8,19 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day20.txt");
+const data: usize = 33100000;
 
 pub fn main() !void {
-    
+    for (720720..1081080) |i| {
+        var total: usize = 0;
+        for (1..i+1) |j| {
+            if (i % j == 0 and i / j < 50) total += 11 * j;
+        }
+        if (total >= data) {
+            print("{d}\n", .{i});
+            break;
+        }
+    }
 }
 
 // Useful stdlib functions
