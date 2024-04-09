@@ -11,7 +11,25 @@ const gpa = util.gpa;
 const data = @embedFile("data/day03.txt");
 
 pub fn main() !void {
-    
+    var lines = tokenizeSca(u8, data, '\n');
+    var arr: [3][3]usize = undefined;
+    var res: usize = 0;
+    while (lines.peek()) |_| {
+        for (0..3) |r| {
+            const line = lines.next().?;
+            var nums = tokenizeAny(u8, line, " ");
+            for (0..3) |c| {
+                arr[c][r] = try parseInt(usize, nums.next().?, 10);
+                // part 1
+                // if (arr[0] + arr[1] > arr[2]) res += 1;
+            }
+        }
+        for (0..3) |tri| {
+            sort(usize, &arr[tri], {}, asc(usize));
+            if (arr[tri][0] + arr[tri][1] > arr[tri][2]) res += 1;
+        }
+    }
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

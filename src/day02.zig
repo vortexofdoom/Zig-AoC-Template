@@ -10,8 +10,56 @@ const gpa = util.gpa;
 
 const data = @embedFile("data/day02.txt");
 
+
 pub fn main() !void {
-    
+    var lines = tokenizeSca(u8, data, '\n');
+    var b: u4 = 5;
+    while (lines.next()) |line| {
+        for (line) |c| {
+            switch (c) {
+                'U' => {
+                    // part 1
+                    // if (b > 3) b -= 3;
+                    // part 2
+                    switch (b) {
+                        0x3, 0xD => b -= 2,
+                        0x6...0x8, 0xA...0xC => b -= 4,
+                        else => {}
+                    }
+                },
+                'R' => {
+                    // part 1
+                    // if (b % 3 != 0) b += 1;
+                    // part 2
+                    switch (b) {
+                        2, 3, 5...8, 0xA, 0xB => b += 1,
+                        else => {}
+                    }
+                },
+                'D' => {
+                    // part 1
+                    // if (b < 7) b += 3;
+                    // part 2
+                    switch (b) {
+                        0x1, 0xB => b += 2,
+                        0x2...0x4, 0x6...0x8 => b += 4,
+                        else => {}
+                    }
+                },
+                'L' => {
+                    // part 1
+                    // if (b % 3 != 1) b -= 1;
+                    // part 2
+                    switch (b) {
+                        3, 4, 6...9, 0xB, 0xC => b -= 1,
+                        else => {}
+                    }
+                },
+                else => unreachable
+            }
+        }
+        print("{x}", .{b});
+    }
 }
 
 // Useful stdlib functions

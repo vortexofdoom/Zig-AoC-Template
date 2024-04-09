@@ -10,8 +10,79 @@ const gpa = util.gpa;
 
 const data = @embedFile("data/day01.txt");
 
+const Dir = enum {
+    N,
+    E,
+    S,
+    W,
+
+    fn turn(self: *Dir, d: u8) void {
+        self.* = switch (self.*) {
+            .N => if (d == 'L') Dir.W else Dir.E,
+            .E => if (d == 'L') Dir.N else Dir.S,
+            .S => if (d == 'L') Dir.E else Dir.W,
+            .W => if (d == 'L') Dir.S else Dir.N,
+        };
+    }
+};
+
+const GRID_OFFSET = 256;
+const GRID_SIZE = 512;
+var visited: [GRID_SIZE][GRID_SIZE]bool = [1][GRID_SIZE]bool{[1]bool{false} ** GRID_SIZE} ** GRID_SIZE;
+
 pub fn main() !void {
-    
+    var ew: isize = 0;
+    var ns: isize = 0;
+    var map = Map(struct {isize, isize}, void).init(gpa);
+    try map.put(.{0, 0}, {});
+    var dir = Dir.N;
+    var tokens = tokenizeSeq(u8, trim(u8, data, "\n"), ", ");
+    outer: while (tokens.next()) |t| {
+        print("N: {d}, E: {d}\n", .{ns, ew});
+        const walk = try parseInt(u32, t[1..], 10);
+        print("{d}\n", .{walk});
+        dir.turn(t[0]);
+        switch (dir) {
+            .N => {
+                const c: usize = @bitCast(ew + GRID_OFFSET);
+                var r: usize = @bitCast(ns + GRID_OFFSET);
+                const end = r + walk;
+                while (r < end) : ({r += 1; ns += 1;}) {
+                    if (visited[r][c]) break: outer else visited[r][c] = true;
+                }
+            },
+            .E => {
+                const r: usize = @bitCast(ns + GRID_OFFSET);
+                var c: usize = @bitCast(ew + GRID_OFFSET);
+                const end = c + walk;
+                while (c < end) : ({c += 1; ew += 1;}) {
+                    if (visited[r][c]) break: outer else visited[r][c] = true;
+                }
+            },
+            .S => {
+                const c: usize = @bitCast(ew + GRID_OFFSET);
+                var r: usize = @bitCast(ns + GRID_OFFSET);
+                const end = r - walk;
+                while (r > end) : ({r -= 1; ns -= 1;}){
+                    if (visited[r][c]) break: outer else visited[r][c] = true;
+                }
+            },
+            .W => {
+                const r: usize = @bitCast(ns + GRID_OFFSET);
+                var c: usize = @bitCast(ew + GRID_OFFSET);
+                const end = c - walk;
+                while (c > end) : ({c -= 1; ew -= 1;}){
+                    if (visited[r][c]) break: outer else visited[r][c] = true;
+                }
+            }
+        }
+        const entry = try map.getOrPut(.{ns, ew});
+        if (entry.found_existing) {
+            print("Found\n", .{});
+            break;
+        }
+    }
+    print("N: {d}, E: {d}\n", .{ns, ew});
 }
 
 // Useful stdlib functions
