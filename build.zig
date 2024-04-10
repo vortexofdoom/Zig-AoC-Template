@@ -51,7 +51,6 @@ pub fn build(b: *Build) void {
             .optimize = mode,
         });
         linkObject(b, exe);
-
         const install_cmd = b.addInstallArtifact(exe, .{});
 
         const build_test = b.addTest(.{

@@ -8,10 +8,27 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day09.txt");
+// const data = @embedFile("data/day09.txt");
+const data = "X(8x2)(3x3)ABCY";
+
+fn dfs(curr: []const u8) !u128 {
+    var res: u128 = 0;
+    var i: usize = 0;
+    while (i < curr.len) : (i += 1) {
+         if (curr[i] == '(') {
+            const x = indexOfStr(u8, curr, i, "x").?;
+            const chars = try parseInt(usize, curr[i+1..x], 10);
+            const end = indexOfStr(u8, curr, x, ")").?;
+            const n = try parseInt(usize, curr[x+1..end], 10);
+            res += n * try dfs(curr[end+1..end+1+chars]);
+            i = end + chars;
+        } 
+    }
+    return res;
+}
 
 pub fn main() !void {
-    
+    print("{d}\n", .{try dfs(data)});
 }
 
 // Useful stdlib functions

@@ -11,7 +11,25 @@ const gpa = util.gpa;
 const data = @embedFile("data/day06.txt");
 
 pub fn main() !void {
-    
+    var res = [_][26]usize{[_]usize{0} ** 26} ** 8;
+    var lines = tokenizeSca(u8, data, '\n');
+    while (lines.next()) |line| {
+        for (0..8) |i| res[i][line[i] - 'a'] += 1;
+    }
+    for (0..8) |i| {
+        var curr: u8 = 'a';
+        // var count: usize = 0;
+        var count: usize = std.math.maxInt(usize);
+        for (0..26) |j| {
+            // if (res[i][j] > count) {
+            if (res[i][j] < count) {
+                curr = 'a' + @as(u8, @truncate(j));
+                count = res[i][j];
+            }
+        }
+        print("{c}", .{curr});
+    }
+    print("\n", .{});
 }
 
 // Useful stdlib functions
