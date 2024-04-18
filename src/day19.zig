@@ -4,17 +4,34 @@ const List = std.ArrayList;
 const Map = std.AutoHashMap;
 const StrMap = std.StringHashMap;
 const BitSet = std.DynamicBitSet;
+const Deque = @import("array-deque").ArrayDeque;
 
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day19.txt");
+const data = 3005290;
+//const data = 5;
 
 pub fn main() !void {
-    var lines = tokenizeSca(u8, data, '\n');
-    while (lines.next()) |line| {
-        
+    var l = try Deque(usize).initCapacity(gpa, data);
+    var r = try Deque(usize).initCapacity(gpa, data);
+    //var q = try List(usize).initCapacity(gpa, data + 1);
+    defer l.deinit();
+    defer r.deinit();
+    for (1..data / 2 + 1) |i| {
+        try l.append(i);
     }
+    for (data / 2 + 1..data + 1) |i| {
+        try r.prepend(i);
+    }
+    while (l.len() > 0 and r.len() > 0) {
+        _ = if (l.len() > r.len()) l.popBack() else r.popBack();
+        try r.prepend(l.popFront());
+        try l.append(r.popBack());
+        //print("{any}\n", .{q.items});
+    }
+    const res = if (l.len() > 0) l.get(0).* else r.get(0).*;
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

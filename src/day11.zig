@@ -11,14 +11,6 @@ const gpa = util.gpa;
 
 const data = @embedFile("data/day11.txt");
 
-const Elems = struct {
-    pm: u2,
-    pu: u2,
-    ru: u2,
-    sr: u2,
-    tm: u2,
-};
-
 const Pair = struct {
     gen: u2,
     chip: u2,
@@ -36,79 +28,83 @@ const Pair = struct {
     }
 };
 
-const QEntry = struct {
-    steps: usize,
-    state: State,
-};
+fn QEntry(comptime N: usize) type {
+    return struct {
+        steps: usize,
+        state: State(N),
+    };
+}
 
-const State = struct {
-    const Self = @This();
-    pairs: [5]Pair,
-    f: u2,
+fn State(comptime N: usize) type {
+    return struct {
+        const Self = @This();
+        pairs: [N]Pair,
+        f: u2,
 
-    fn print(self: Self) void {
-        for (0..4) |f| {
-            if (self.f == 3 - f) std.debug.print("E|", .{}) else std.debug.print(" |", .{});
-            for (self.pairs, 0..) |p, i| {
-                const c = p.chip == 3 - f;
-                const g = p.gen == 3 - f;
-                if (c and g) std.debug.print("[C{d}, G{d}]", .{i, i})
-                else if (c) std.debug.print("[C{d}]", .{i})
-                else if (g) std.debug.print("[G{d}]", .{i});
+        fn print(self: Self) void {
+            for (0..4) |f| {
+                if (self.f == 3 - f) std.debug.print("E|", .{}) else std.debug.print(" |", .{});
+                for (self.pairs, 0..) |p, i| {
+                    const c = p.chip == 3 - f;
+                    const g = p.gen == 3 - f;
+                    if (c and g) std.debug.print("[C{d}, G{d}]", .{i, i})
+                    else if (c) std.debug.print("[C{d}]", .{i})
+                    else if (g) std.debug.print("[G{d}]", .{i});
+                }
+                std.debug.print("\n", .{});
             }
-            std.debug.print("\n", .{});
+            std.debug.print("------------\n", .{});
         }
-        std.debug.print("------------\n", .{});
-    }
 
-    fn update(self: Self, items: [2]?Item, up: bool) ?Self {
-        var new = self;
-        if (up) {
-            if (new.f == 3) return null else new.f += 1;
-        } else {
-            if (new.f == 0) return null else new.f -= 1;
-        }
-        for (items) |maybe_item| {
-            if (maybe_item) |item| {
-                const to_change = new.get(item);
+        fn update(self: Self, items: [2]?Item, up: bool) ?Self {
+            var new = self;
+            if (up) {
+                if (new.f == 3) return null else new.f += 1;
+            } else {
+                if (new.f == 0) return null else new.f -= 1;
+            }
+            for (items) |maybe_item| {
+                if (maybe_item) |item| {
+                    const to_change = new.get(item);
 
-                if (up) {
-                    if (to_change.* == 3) return null else to_change.* += 1;
-                } else {
-                    if (to_change.* == 0) return null else to_change.* -= 1;
+                    if (up) {
+                        if (to_change.* == 3) return null else to_change.* += 1;
+                    } else {
+                        if (to_change.* == 0) return null else to_change.* -= 1;
+                    }
                 }
             }
-        }
-        sort(Pair, &new.pairs, {}, Pair.lt);
-        // return new;
-        // return if (new.bad()) null else new;
-        if (new.bad()) return null else {
-            // new.print();
-            return new;
-        }
-    }
-
-    fn done(self: Self) bool {
-        for (self.pairs) |p| if (!p.done()) return false;
-        return true;
-    }
-
-    fn bad(self: Self) bool {
-        for (0..4) |i| {
-            for (i + 1..5) |j| {
-                if (self.pairs[i].fried(self.pairs[j])) return true;
+            sort(Pair, &new.pairs, {}, Pair.lt);
+            // return new;
+            // return if (new.bad()) null else new;
+            if (new.bad()) return null else {
+                // new.print();
+                return new;
             }
         }
-        return false;
-    }
 
-    fn get(self: *Self, item: Item) *u2 {
-        return switch (item) {
-            .gen => |i| &self.pairs[i].gen,
-            .chip => |i| &self.pairs[i].chip,
-        };
-    }
-};
+        fn done(self: Self) bool {
+            for (self.pairs) |p| if (!p.done()) return false;
+            return true;
+        }
+
+        fn bad(self: Self) bool {
+            for (0..N-1) |i| {
+                for (i + 1..N) |j| {
+                    if (self.pairs[i].fried(self.pairs[j])) return true;
+                }
+            }
+            return false;
+        }
+
+        fn get(self: *Self, item: Item) *u2 {
+            return switch (item) {
+                .gen => |i| &self.pairs[i].gen,
+                .chip => |i| &self.pairs[i].chip,
+            };
+        }
+    };
+}
 
 const Item = union(enum) {
     gen: usize,
@@ -117,7 +113,7 @@ const Item = union(enum) {
 
 // var map: Map(State, void) = undefined;
 
-fn lt(_: void, l: QEntry, r: QEntry) std.math.Order {
+fn lt(_: void, l: QEntry(N_PAIRS), r: QEntry(N_PAIRS)) std.math.Order {
     return switch (std.math.order(l.steps, r.steps)) {
         .eq => {
             var a_sum: usize = l.state.f;
@@ -152,16 +148,19 @@ const Entry = struct {
 
 // var q: Queue(State, void, lt) = undefined; //.init(gpa, {});
 
+const N_PAIRS = 7;
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
-    var map = Map(State, Entry).init(arena.allocator());
+    var map = Map(State(N_PAIRS), Entry).init(arena.allocator());
     var buf = try List(Item).initCapacity(arena.allocator(), 10);
-    var states = List(State).init(arena.allocator());
-
-    const start = State{
+    var states = List(State(N_PAIRS)).init(arena.allocator());
+    const start = State(N_PAIRS){
     //_ = State{
         .pairs = [_]Pair{
+            Pair{.chip = 0, .gen = 0},
+            Pair{.chip = 0, .gen = 0},
+            // Part 1
             Pair{.chip = 0, .gen = 0},
             Pair{.chip = 1, .gen = 0},
             Pair{.chip = 1, .gen = 0},
@@ -171,8 +170,8 @@ pub fn main() !void {
         .f = 0,
     };
 
-    var q = Queue(QEntry, void, lt).init(arena.allocator(), {});
-    try q.add(QEntry{ .state = start, .steps = 0});
+    var q = Queue(QEntry(N_PAIRS), void, lt).init(arena.allocator(), {});
+    try q.add(.{ .state = start, .steps = 0});
     try map.put(start, Entry{.idx = 0, .prev = null});
     try states.append(start);
     var res: usize = 1;
@@ -212,7 +211,7 @@ pub fn main() !void {
                             };
                             try map.put(s, new);
                             try states.append(s);
-                            try q.add(QEntry{ .steps = res, .state = s });
+                            try q.add(.{ .steps = res, .state = s });
                         }
                     }
                 }

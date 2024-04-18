@@ -10,11 +10,37 @@ const gpa = util.gpa;
 
 const data = @embedFile("data/day20.txt");
 
+const Range = struct {
+    start: usize,
+    end: usize,
+};
+
+fn lt(_: void, l: Range, r: Range) bool {
+    return l.start < r.start or (l.start == r.start and l.end < r.end);
+}
+
 pub fn main() !void {
     var lines = tokenizeSca(u8, data, '\n');
-    while (lines.next()) |line| {
-        
+    var res: usize = 0;
+    var ranges: [1005]Range = undefined;
+    for (&ranges) |*r| {
+    // while (lines.next()) |line| {
+        var parts = tokenizeSca(u8, lines.next().?, '-');
+        r.* = Range{
+            .start = try parseInt(usize, parts.next().?, 10),
+            .end = try parseInt(usize, parts.next().?, 10),
+        };      
     }
+    sort(Range, &ranges, {}, lt);
+    var curr = ranges[0];
+    for (ranges[1..]) |r| {
+        if (r.start > curr.end + 1) {
+            res += r.start - (curr.end + 1);
+            curr = r;
+        }
+        curr.end = @max(curr.end, r.end);
+    }
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

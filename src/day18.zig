@@ -8,13 +8,43 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day18.txt");
+const data = ".^^^.^.^^^.^.......^^.^^^^.^^^^..^^^^^.^.^^^..^^.^.^^..^.^..^^...^.^^.^^^...^^.^.^^^..^^^^.....^....";
+const rows = 400000;
+//const data = "..^^.";
+//const rows = 3;
 
 pub fn main() !void {
-    var lines = tokenizeSca(u8, data, '\n');
-    while (lines.next()) |line| {
-        
+    var a = [_]bool{false} ** data.len;
+    var b = [_]bool{false} ** data.len;
+    var curr = &a;
+    var prev = &b;
+    var res: usize = 0;
+    for (data, 0..) |by, i| {
+        prev[i] = by == '^';
     }
+    for (0..rows - 1) |_| {
+        for (prev) |t| {
+            res += @intFromBool(!t);
+            //if (t) print("^", .{}) else print(".", .{});
+        }
+        //print("\n", .{});
+        for (0..data.len) |i| {
+            const l = if (i == 0) false else prev[i-1];
+            const r = if (i == data.len - 1) false else prev[i+1];
+            curr[i] = l != r;
+        }
+        const temp = curr;
+        curr = prev;
+        prev = temp;
+    }
+    // for (prev) |t| {
+    //     if (t) print("^", .{}) else print(".", .{});
+    // }
+    // print("\n", .{});
+    //var res: usize = 0;
+    for (prev) |t| {if (!t) res += 1;}
+    print("{d}\n", .{res});
+
 }
 
 // Useful stdlib functions

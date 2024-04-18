@@ -9,12 +9,27 @@ const util = @import("util.zig");
 const gpa = util.gpa;
 
 const data = @embedFile("data/day15.txt");
+//const count = [_]usize { 5, 2 };
+//var curr = [_]usize { 4, 1 };
+ const count = [_]usize{13, 19, 3, 7, 5, 17, 11};
+ var curr = [_]usize{1, 10, 2, 1, 3, 5, 0};
 
 pub fn main() !void {
-    var lines = tokenizeSca(u8, data, '\n');
-    while (lines.next()) |line| {
-        
+    for (&curr, 0..) |*d, i| {
+        d.* = (d.* + i + 1) % count[i];
     }
+    var i: usize = 0;
+    var again = true;
+    while (again) : ({
+        i += 1;
+    }) {
+        again = false;
+        for (curr) |d| {if (d != 0) again = true;}
+        for (&curr, 0..) |*d, j| {
+            d.* = (d.* + 1) % count[j];
+        }
+    }
+    print("{d}\n", .{i - 1});
 }
 
 // Useful stdlib functions
