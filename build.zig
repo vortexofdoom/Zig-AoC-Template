@@ -50,6 +50,10 @@ pub fn build(b: *Build) void {
             .target = target,
             .optimize = mode,
         });
+
+        const arr_dq = b.addModule("array-deque", .{.root_source_file = .{ .path = "../../../zig-arraydeque/src/array_deque.zig"}});
+        exe.root_module.addImport("array-deque", arr_dq);
+        
         linkObject(b, exe);
         const install_cmd = b.addInstallArtifact(exe, .{});
 
