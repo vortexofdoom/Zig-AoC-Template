@@ -11,7 +11,12 @@ const gpa = util.gpa;
 const data = @embedFile("data/day01.txt");
 
 pub fn main() !void {
-    
+    const last = data[data.len / 2];
+    var res: usize = (last - '0') * @intFromBool(last == data[0]);
+    for (data[0..data.len - 1], data.len / 2..) |b, i| {
+        res += (b - '0') * @intFromBool(b == data[i % data.len]);
+    }
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

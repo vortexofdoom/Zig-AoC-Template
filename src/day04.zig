@@ -11,7 +11,30 @@ const gpa = util.gpa;
 const data = @embedFile("data/day04.txt");
 
 pub fn main() !void {
-    
+    var lines = tokenizeSca(u8, data, '\n');
+    var map = StrMap(void).init(gpa);
+    var res: usize = 0;
+    while (lines.next()) |line| {
+        map.clearRetainingCapacity();
+        var words = tokenizeSca(u8, line, ' ');
+        var found = false;
+        while (words.next()) |w| {
+            const k = try gpa.dupe(u8, w);
+            sort(u8, k, {}, asc(u8));
+            const e = try map.getOrPut(k);
+            if (e.found_existing) {
+                found = true;
+                break;
+            }
+
+        }
+        if (!found) res += 1;
+        var iter = map.keyIterator();
+        while (iter.next()) |s| {
+            gpa.free(s.*);
+        }
+    }
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

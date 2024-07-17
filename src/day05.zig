@@ -11,7 +11,21 @@ const gpa = util.gpa;
 const data = @embedFile("data/day05.txt");
 
 pub fn main() !void {
-    
+    var lines = tokenizeSca(u8, data, '\n');
+    var inst: [1052]isize = undefined;
+    var i: isize = 0;
+    while (lines.next()) |line| : (i += 1) {
+        inst[@bitCast(i)] = try parseInt(isize, line, 10);
+    }
+    i = 0;
+    var steps: usize = 0;
+    while (i >= 0 and i < inst.len) : (steps += 1) {
+        const p = &inst[@bitCast(i)];
+        const diff: isize = if (p.* >= 3) -1 else 1;
+        p.* += diff;
+        i += p.* - diff;
+    }
+    print("{d}\n", .{steps});
 }
 
 // Useful stdlib functions

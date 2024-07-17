@@ -8,10 +8,39 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
+const SLOTS: usize = 16;
+
 const data = @embedFile("data/day06.txt");
 
 pub fn main() !void {
-    
+    var lines = tokenizeAny(u8, data, "\t\n");
+    var i: u4 = 0;
+    var bank: [SLOTS]usize = undefined;
+    while (lines.next()) |line| : (i +%= 1) {
+        bank[i] = try parseInt(usize, line, 10);
+    }
+    var map = Map([SLOTS]usize, usize).init(gpa);
+    var cycles: usize = 0;
+    while (true) : (cycles += 1) {
+        i = 0;
+        const e = try map.getOrPut(bank);
+        if (e.found_existing) {
+            print("{d}\n", .{cycles - e.value_ptr.*});
+            break;
+        }
+        e.value_ptr.* = cycles;
+        for (bank, 0..) |b, j| {
+            if (b > bank[i]) i = @truncate(j);
+        }
+        var curr = bank[i];
+        bank[i] = 0;
+        i +%= 1;
+        while (curr > 0) : ({i +%= 1; curr -= 1;}) {
+            bank[i] += 1;
+        }
+    }
+
+    print("{d}\n", .{cycles});
 }
 
 // Useful stdlib functions

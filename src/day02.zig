@@ -11,7 +11,33 @@ const gpa = util.gpa;
 const data = @embedFile("data/day02.txt");
 
 pub fn main() !void {
-    
+    var lines = tokenizeSca(u8, data, '\n');
+    var res: usize = 0;
+    while (lines.next()) |line| {
+        var max: usize = 0;
+        var min: usize = std.math.maxInt(usize);
+        var numstrs = tokenizeSca(u8, line, '\t');
+        var nums = [_]usize{0} ** 16;
+        var i: usize = 0;
+        loop: while (numstrs.next()) |num| : (i += 1) {
+            const n = try parseInt(usize, num, 10);
+            for (nums[0..i]) |x| {
+                if (x % n == 0) {
+                    res += x / n;
+                    break :loop;
+                } else if (n % x == 0) {
+                    res += n / x;
+                    break :loop;
+                }
+            }
+            nums[i] = n;
+            // print("{s}\n", .{num});
+            max = @max(max, n);
+            min = @min(min, n);
+        }
+        // res += max - min;
+    }
+    print("{d}\n", .{res});
 }
 
 // Useful stdlib functions

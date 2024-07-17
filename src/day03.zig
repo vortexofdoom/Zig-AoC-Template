@@ -8,9 +8,24 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day03.txt");
+const data = 368078;
+//const data = 4; 
 
 pub fn main() !void {
+    var total: usize = 1;
+    var add: usize = 0;
+    var i: usize = 0;
+    var side: usize = 1;
+    while (total + add < data) : ({total += add; add += 8; i += 1; side += 2;}) {}
+    var rest = i - 1;
+    var up: bool = false;
+    for (0..add) |k| {
+        if (total + k == data - 1) break;
+        if (rest == i) up = false;
+        if (rest == 0) up = true;
+        if (up) rest += 1 else rest -= 1;
+    }
+    print("{d}\n", .{i + rest});
     
 }
 
