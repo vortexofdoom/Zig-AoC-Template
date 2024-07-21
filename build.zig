@@ -21,7 +21,7 @@ pub fn build(b: *Build) void {
     }
 
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardOptimizeOption(.{});
+    const mode = b.standardOptimizeOption(.{ .preferred_optimize_mode = .ReleaseFast });
 
     const install_all = b.step("install_all", "Install all days");
     const run_all = b.step("run_all", "Run all days");
@@ -30,12 +30,12 @@ pub fn build(b: *Build) void {
     const build_generate = b.addExecutable(.{
         .target = target,
         .name = "generate",
-        .root_source_file = .{ .path = "template/generate.zig" },
+        .root_source_file = .{ .cwd_relative = "template/generate.zig" },
         .optimize = .ReleaseSafe,
     });
 
     const run_generate = b.addRunArtifact(build_generate);
-    run_generate.setCwd(.{ .path = std.fs.path.dirname(@src().file).? });
+    run_generate.setCwd(.{ .cwd_relative = std.fs.path.dirname(@src().file).? });
     generate.dependOn(&run_generate.step);
 
     // Set up an exe for each day
@@ -46,7 +46,7 @@ pub fn build(b: *Build) void {
 
         const exe = b.addExecutable(.{
             .name = dayString,
-            .root_source_file = .{ .path = zigFile },
+            .root_source_file = .{ .cwd_relative = zigFile },
             .target = target,
             .optimize = mode,
         });
@@ -55,7 +55,7 @@ pub fn build(b: *Build) void {
         const install_cmd = b.addInstallArtifact(exe, .{});
 
         const build_test = b.addTest(.{
-            .root_source_file = .{ .path = zigFile },
+            .root_source_file = .{ .cwd_relative = zigFile },
             .target = target,
             .optimize = mode,
         });
@@ -93,7 +93,7 @@ pub fn build(b: *Build) void {
     {
         const test_util = b.step("test_util", "Run tests in util.zig");
         const test_cmd = b.addTest(.{
-            .root_source_file = .{ .path = "src/util.zig" },
+            .root_source_file = .{ .cwd_relative = "src/util.zig" },
             .target = target,
             .optimize = mode,
         });

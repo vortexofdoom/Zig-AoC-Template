@@ -12,9 +12,34 @@ const data = @embedFile("data/day09.txt");
 
 pub fn main() !void {
     var lines = tokenizeSca(u8, data, '\n');
-    while (lines.next()) |line| {
-        
+    const input = lines.next().?;
+    var i: usize = 0;
+    var garbage = false;
+    var curr_score: usize = 0;
+    var total_score: usize = 0;
+    var non_canceled: usize = 0;
+    while (i < input.len) : (i += 1) {
+        if (garbage) non_canceled += 1;
+        switch (input[i]) {
+            '!' => {
+                i += 1;
+                if (garbage) non_canceled -= 1;
+            },
+            '<' => garbage = true,
+            '>' => {
+                garbage = false;
+                non_canceled -= 1;
+            },
+            '{' => if (!garbage) { curr_score += 1; },
+            '}' => if (!garbage) {
+                total_score += curr_score;
+                curr_score -= 1;
+            },
+            else => {}
+        }
     }
+    print("{d}\n", .{total_score});
+    print("{d}\n", .{non_canceled});
 }
 
 // Useful stdlib functions

@@ -8,13 +8,33 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day10.txt");
+// const data: [16]u8 = [_]u8{ 18, 1, 0, 161, 255, 137, 254, 252, 14, 95, 165, 33, 181, 168, 2, 188 };
+const data = "18,1,0,161,255,137,254,252,14,95,165,33,181,168,2,188";
+//const data = "1,2,3";
 
 pub fn main() !void {
-    var lines = tokenizeSca(u8, data, '\n');
-    while (lines.next()) |line| {
-        
+    var list: [256]u8 = undefined;
+    var skip: u8 = 0;
+    for (0..256) |i| list[i] = @truncate(i);
+    var curr: u8 = 0;
+    for (0..64) |_| {
+        for (data ++ &[_]u8{17, 31, 73, 47, 23}) |len| {
+            var i: u8 = 0;
+            while (i < len / 2) : (i += 1) {
+                std.mem.swap(u8, &list[curr +% i], &list[curr +% (len - 1 - i)]);
+            }
+            curr +%= len +% skip;
+            skip +%= 1;
+        }
     }
+    for (0..16) |i| {
+        var byte: u8 = 0;
+        for (0..16) |j| {
+            byte ^= list[i*16 + j];
+        }
+        print("{x:0>2}", .{byte});
+    }
+    print("\n", .{});
 }
 
 // Useful stdlib functions

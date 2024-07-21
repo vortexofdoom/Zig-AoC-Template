@@ -12,9 +12,35 @@ const data = @embedFile("data/day13.txt");
 
 pub fn main() !void {
     var lines = tokenizeSca(u8, data, '\n');
+    var firewall = [_]usize{0} ** 93;
+    // var scanner = [_]usize{0} ** 93;
     while (lines.next()) |line| {
-        
+        var iter = splitSeq(u8, line, ": ");
+        firewall[try parseInt(usize, iter.next().?, 10)] = try parseInt(usize, iter.next().?, 10);
     }
+    // var severity: isize = 1;
+    var caught = true;
+    var delay: usize = 0;
+    while (caught) : (delay += 1) {
+        caught = false;
+        for (0..93) |i| {
+            if (firewall[i] > 0 and ((delay + i) % (2 * (firewall[i] - 1)) == 0)) {
+                caught = true;
+                break;
+            }
+        }
+    }
+    // for (0..93) |packet| {
+    //     if (firewall[packet] != 0 and scanner[packet] == 0) severity += @as(isize, @bitCast(packet)) * firewall[packet];
+    //     for (0..93) |i| {
+    //         if (scanner[i] == firewall[i] - 1) {
+    //             scanner[i] = -scanner[i];
+    //         }
+    //         scanner[i] += 1;
+    //     }
+    // }
+    // print("{d}\n", .{severity});
+    print("{d}\n", .{delay});
 }
 
 // Useful stdlib functions
